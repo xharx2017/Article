@@ -25,7 +25,8 @@ with d as
  */
  --以下语句提取截止日期前所有相关单据数据
  --**********2017-03-21**************
- --修改
+ --1、修改退货调回的金额为负数
+ --2、关于业务员仓库，还需进一步了解
  select s.FDate,s.FBillNo,'直接调拨单业务分单' BillType,'正常调出' BussnessExp,s.FNOTE,
         s.F_PAEZ_BASE1 XCYCustID,sum(e.F_PAEZ_SALEAMOUNT) Amount,0 FSumsort
    from T_STK_STKTRANSFERIN S
@@ -35,7 +36,7 @@ with d as
    group by s.FDate,s.FBillNo,s.FNOTE,s.F_PAEZ_BASE1
  union all
  select s.FDate,s.FBillNo,'直接调拨单业务分单' BillType,'退货调回' BussnessExp,s.FNOTE,
-        s.F_PAEZ_BASE1 XCYCustID,sum(e.F_PAEZ_SALEAMOUNT) Amount,0 FSumsort
+        s.F_PAEZ_BASE1 XCYCustID,-sum(e.F_PAEZ_SALEAMOUNT) Amount,0 FSumsort
    from T_STK_STKTRANSFERIN S
    left join t_STK_STKTransferInEntry E on s.FID=e.FID
    where s.F_PAEZ_Assistant6='5865f8fbe40e01' and s.FBillTypeID='ce8f49055c5c4782b65463a3f863bb4a'
