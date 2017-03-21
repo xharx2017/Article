@@ -27,6 +27,16 @@ with d as
  --**********2017-03-21**************
  --1、修改退货调回的金额为负数
  --2、关于业务员仓库，还需进一步了解
+  /*
+    了解情况：
+    商品从一个宣传员那里调拨到另一个宣传员那里，调出宣传员的往来减少；调入宣传员的往来增加。
+    与原来的直接调拨单应收区别在于：原来是从公司装车到车辆，即由公司库调拨到车辆库；然后再由车辆库调拨至宣传员（即业务分单）。
+    所以原来的只用考虑调拨到宣传员，就增加宣传员应收；调回，就减少宣传员应收。
+    这次增加了宣传员之间互相调拨，所以统计时就要考虑这种新情况。
+    但是以宣传员命名的仓库与宣传员之间并没有数据上的关联，因此只能依靠名称来进行判定。
+    根据调拨单分录上的仓库字段内码查询仓库编码，凡以XCYCK开头的均为宣传员仓库，
+    再根据仓库名称的前6位（即宣传员卡号，与宣传员档案的编码一致），关联查询宣传员档案，获得宣传员内码
+  */
  select s.FDate,s.FBillNo,'直接调拨单业务分单' BillType,'正常调出' BussnessExp,s.FNOTE,
         s.F_PAEZ_BASE1 XCYCustID,sum(e.F_PAEZ_SALEAMOUNT) Amount,0 FSumsort
    from T_STK_STKTRANSFERIN S
@@ -34,6 +44,24 @@ with d as
    where s.F_PAEZ_Assistant6='5865f8fbe40e01' and s.FBillTypeID='ce8f49055c5c4782b65463a3f863bb4a'
      and s.FDate<=@de and FTRANSFERDIRECT='GENERAL'   --正常调出，增加应收
    group by s.FDate,s.FBillNo,s.FNOTE,s.F_PAEZ_BASE1
+/*
+   2017-03-21新增处理宣传员仓库调出情况处理
+   凡从宣传员仓库调出，则扣减该宣传员往来
+   仍然是根据上节正常调出的代码，分析单据体的调出仓库是否属于宣传员仓库（判定依据：仓库编码前五位为XCYCK）
+   如果是宣传员仓库，则进一步提取仓库名称的前六位（即卡号，与宣传员编码一致）
+   然后以此查询宣传员内码，写入客户字段
+*/
+ union ALL
+ select s.FDate,s.FBillNo,'直接调拨单业务分单','宣传员仓调出',s.FNOTE,
+        c.FCustID,-e.F_PAEZ_SALEAMOUNT,0
+   from T_STK_STKTRANSFERIN S
+   left join t_STK_STKTransferInEntry E on s.FID=e.FID
+   left join t_BD_stock k on k.FStockID=e.FSRCStockID and left(k.FNumber,5)='XCYCK'
+   left join t_BD_stock_L kl on k.FStockID=kl.FStockID and kl.FLOCALEID=2052
+   left join t_BD_customer c on c.FNumber=left(kl.FName,6)
+   where s.F_PAEZ_Assistant6='5865f8fbe40e01' and s.FBillTypeID='ce8f49055c5c4782b65463a3f863bb4a'
+     and s.FDate<=@de and FTRANSFERDIRECT='GENERAL'   --由宣传员仓库调出，扣减该宣传员的应收
+	 and c.FCustID is not NULL
  union all
  select s.FDate,s.FBillNo,'直接调拨单业务分单' BillType,'退货调回' BussnessExp,s.FNOTE,
         s.F_PAEZ_BASE1 XCYCustID,-sum(e.F_PAEZ_SALEAMOUNT) Amount,0 FSumsort
