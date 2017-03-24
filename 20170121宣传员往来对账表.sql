@@ -52,7 +52,8 @@ with d as
    然后以此查询宣传员内码，写入客户字段
 */
  union ALL
- select s.FDate,s.FBillNo,'直接调拨单业务分单','宣传员仓调出',s.FNOTE,
+ --2017-03-24,“宣传员仓调出”的，摘要取直接调拨单上的“退货摘要”。由FNOTE改为F_PAEZ_Text1。
+ select s.FDate,s.FBillNo,'直接调拨单业务分单','宣传员仓调出',s.F_PAEZ_Text1,
         c.FCustID,-e.F_PAEZ_SALEAMOUNT,0
    from T_STK_STKTRANSFERIN S
    left join t_STK_STKTransferInEntry E on s.FID=e.FID
@@ -62,6 +63,7 @@ with d as
    where s.F_PAEZ_Assistant6='5865f8fbe40e01' and s.FBillTypeID='ce8f49055c5c4782b65463a3f863bb4a'
      and s.FDate<=@de and FTRANSFERDIRECT='GENERAL'   --由宣传员仓库调出，扣减该宣传员的应收
 	 and c.FCustID is not NULL
+ --2017-03-21更新结束
  union all
  select s.FDate,s.FBillNo,'直接调拨单业务分单' BillType,'退货调回' BussnessExp,s.FNOTE,
         s.F_PAEZ_BASE1 XCYCustID,-sum(e.F_PAEZ_SALEAMOUNT) Amount,0 FSumsort
