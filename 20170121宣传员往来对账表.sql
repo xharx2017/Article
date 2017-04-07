@@ -112,14 +112,18 @@ with d as
    where FCONTACTUNITTYPE='BD_Customer' and (FBillTypeID='58732c4eff1c24' or F_PAEZ_ASSISTANT='57edc4d721df47') --兼容以前使用收款类型字段时的单据
      and FDate<=@de
  union all
+ --2017-04-07 樊云佳提出：销售退货单和收款退款单取数都取成正数
+ --由-FREALREFUNDAMOUNT改为FREALREFUNDAMOUNT
  select FDate,FBillNo,'收款退款单','往来账退款',F_PAEZ_REMARKS,
-        F_PAEZ_BASE2,-FREALREFUNDAMOUNT,0
+        F_PAEZ_BASE2,FREALREFUNDAMOUNT,0
    from T_AR_REFUNDBILL
    where FCONTACTUNITTYPE='BD_Customer' and (FBillTypeID='58736968d9fc52' or F_PAEZ_ASSISTANT='5850bf419a4840')
      and FDate<=@de
  union all
+ --2017-04-07 樊云佳提出：销售退货单和收款退款单取数都取成正数
+ --所以由-sum(f.FAmount)改为sum(f.FAmount)
  select R.FDate,R.FBillNo,'销售退货单','',R.F_PAEZ_REMARKS2,
-        R.F_PAEZ_BASE1,-sum(f.FAmount),0
+        R.F_PAEZ_BASE1,sum(f.FAmount),0
    from T_SAL_RETURNSTOCK R
    left join t_SAL_ReturnStockEntry_F F on r.FID=f.FID
    where R.FDate<=@de
