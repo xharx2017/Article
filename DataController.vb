@@ -6,6 +6,7 @@ Imports Kingdee.Foundation.Secure
 Imports Newtonsoft.Json
 
 Namespace Controllers
+    '2018-07-24：测试Git集成
     Public Class DataController : Inherits ApiController
         ''' <summary>
         ''' 速必达入库单Excel表转储为临时数据
