@@ -1,0 +1,70 @@
+{
+    "Name": "即时库存表",
+    "ItemCodeFrom": "",
+    "ItemCodeTo": "",
+    "ItemInfo": "",
+    "StockCodeFrom": "",
+    "StockCodeTo": "",
+    "Inventories": [
+      {
+        "Code": "001",
+        "Name": "防水胶片",
+        "Model": "",
+        "Barcode": "",
+        "Unit": "平方米",
+        "Inventory": [
+          {
+            "Code": "01",
+            "Name": "1#仓",
+            "Quantity": 9750.0,
+            "AveragePrice": 40.0,
+            "Amount": 390000.0
+          },
+          {
+            "Code": "02",
+            "Name": "2#仓",
+            "Quantity": 50.0,
+            "AveragePrice": 40.0,
+            "Amount": 2000.0
+          },
+          {
+            "Code": "",
+            "Name": "全部仓库",
+            "Quantity": 9800.0,
+            "AveragePrice": 40.0,
+            "Amount": 392000.0
+          }
+        ]
+      },
+      {
+        "Code": "002",
+        "Name": "磨砂胶片",
+        "Model": "",
+        "Barcode": "",
+        "Unit": "平方米",
+        "Inventory": [
+          {
+            "Code": "01",
+            "Name": "1#仓",
+            "Quantity": 14820.0,
+            "AveragePrice": 41.0,
+            "Amount": 607620.0
+          },
+          {
+            "Code": "02",
+            "Name": "2#仓",
+            "Quantity": 80.0,
+            "AveragePrice": 41.0,
+            "Amount": 3280.0
+          },
+          {
+            "Code": "",
+            "Name": "全部仓库",
+            "Quantity": 14900.0,
+            "AveragePrice": 41.0,
+            "Amount": 610900.0
+          }
+        ]
+      }
+    ]
+  }
