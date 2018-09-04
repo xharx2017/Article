@@ -3,19 +3,20 @@
   这坑爹的玩意，让一张简单的报表搞的无比复杂。
   2018-08-21:统计应收货主的装卸费和分拣费；
   2018-08-22:按王静要求，增加统计应支付给工人的装卸费和分拣费；
+  2018-09-04:按王静要求，增加显示实际计费的数量数据，即体积数或重量数F_UX_TOTALBASEQTY_D；
 */
 select * from
 (
 select c.FNumber,cl.FName,b.billNo,to_char(b.ywdate,'yyyy-MM-dd') ywdate,
        m.FNumber GoodNumber,ml.FName GoodName,ml.FSPECIFICATION,m.FOLDNUMBER,al.FDataValue,ul.FName Unit,
-       b.qty,b.zxfprice,b.zxf,b.fjfprice,b.fjf,b.F_UX_WORKERPRICE_D,b.workamount,b.F_UX_FJOUTPRICE,b.F_UX_FJWORKERAMOUNT,
+       b.qty,b.F_UX_TOTALBASEQTY_D,b.zxfprice,b.zxf,b.fjfprice,b.fjf,b.F_UX_WORKERPRICE_D,b.workamount,b.F_UX_FJOUTPRICE,b.F_UX_FJWORKERAMOUNT,
        b.expl,case b.bill when 1 then '其他入库' else '其他出库' end billt
 from
 (
 --查询入库明细数据
  select m.Fownerid custID,m.FBillNo billNo,d.Fmaterialid goodID,d.Fbaseunitid unitID,
         case when m.Fstockdirect='GENERAL' then d.FBaseQty else -d.FBaseQty end qty,
-        d.f_Ux_Unloadcosttype_d costID,d.f_ux_inprice_d zxfPrice,
+        d.f_Ux_Unloadcosttype_d costID,d.F_UX_TOTALBASEQTY_D,d.f_ux_inprice_d zxfPrice,
         case when m.Fstockdirect='GENERAL' then d.f_ux_inamount_d else -d.f_ux_inamount_d end zxf,
         d.f_ux_fjinprice fjfPrice,
         case when m.Fstockdirect='GENERAL' then d.f_ux_fjowneramount else -d.f_ux_fjowneramount end fjf,
@@ -31,7 +32,7 @@ from
  Union ALL
 --查询出库明细数据
  select m.Fownerid,m.FBillNo,d.Fmaterialid,d.Fbaseunitid,case when m.Fstockdirect='GENERAL' then d.FBaseQty else -d.FBaseQty end,
-        d.f_Ux_Unloadcosttype_d,
+        d.f_Ux_Unloadcosttype_d,d.F_UX_TOTALBASEQTY_D,
         d.F_UX_OUTPRICE_D,case when m.Fstockdirect='GENERAL' then d.F_UX_OUTAMOUNT_D else -F_UX_OUTAMOUNT_D end,
         d.F_UX_FJINPRICE,case when m.Fstockdirect='GENERAL' then d.F_UX_FJOWNERAMOUNT else -d.F_UX_FJOWNERAMOUNT end,
         d.F_UX_WORKERPRICE_D,case when m.Fstockdirect='GENERAL' then d.F_UX_WORKAMOUNT_D else -d.F_UX_WORKAMOUNT_D end,
@@ -54,14 +55,14 @@ from
 Union All
 select c.FNumber,cl.FName||'-合计',N'','',
        N'',N'',N'',N'',N'',N'',
-       sum(b.qty),0,sum(b.zxf),0,sum(b.fjf),0,sum(b.workamount),0,sum(b.F_UX_FJWORKERAMOUNT),
+       sum(b.qty),0,0,sum(b.zxf),0,sum(b.fjf),0,sum(b.workamount),0,sum(b.F_UX_FJWORKERAMOUNT),
        N'',''
 from 
 (
 --查询入库明细数据
  select m.Fownerid custID,m.FBillNo billNo,d.Fmaterialid goodID,d.Fbaseunitid unitID,
         case when m.Fstockdirect='GENERAL' then d.FBaseQty else -d.FBaseQty end qty,
-        d.f_Ux_Unloadcosttype_d costID,d.f_ux_inprice_d zxfPrice,
+        d.f_Ux_Unloadcosttype_d costID,d.F_UX_TOTALBASEQTY_D,d.f_ux_inprice_d zxfPrice,
         case when m.Fstockdirect='GENERAL' then d.f_ux_inamount_d else -d.f_ux_inamount_d end zxf,
         d.f_ux_fjinprice fjfPrice,
         case when m.Fstockdirect='GENERAL' then d.f_ux_fjowneramount else -d.f_ux_fjowneramount end fjf,
@@ -77,7 +78,7 @@ from
  Union ALL
 --查询出库明细数据
  select m.Fownerid,m.FBillNo,d.Fmaterialid,d.Fbaseunitid,case when m.Fstockdirect='GENERAL' then d.FBaseQty else -d.FBaseQty end,
-        d.f_Ux_Unloadcosttype_d,
+        d.f_Ux_Unloadcosttype_d,d.F_UX_TOTALBASEQTY_D,
         d.F_UX_OUTPRICE_D,case when m.Fstockdirect='GENERAL' then d.F_UX_OUTAMOUNT_D else -F_UX_OUTAMOUNT_D end,
         d.F_UX_FJINPRICE,case when m.Fstockdirect='GENERAL' then d.F_UX_FJOWNERAMOUNT else -d.F_UX_FJOWNERAMOUNT end,
         d.F_UX_WORKERPRICE_D,case when m.Fstockdirect='GENERAL' then d.F_UX_WORKAMOUNT_D else -d.F_UX_WORKAMOUNT_D end,
@@ -96,14 +97,14 @@ from
 Union all
 select N'',N'总计',N'','',
        N'',N'',N'',N'',N'',N'',
-       sum(b.qty),0,sum(b.zxf),0,sum(b.fjf),0,sum(b.workamount),0,sum(b.F_UX_FJWORKERAMOUNT),
+       sum(b.qty),0,0,sum(b.zxf),0,sum(b.fjf),0,sum(b.workamount),0,sum(b.F_UX_FJWORKERAMOUNT),
        N'',''
 from
 (
 --查询入库明细数据
  select m.Fownerid custID,m.FBillNo billNo,d.Fmaterialid goodID,d.Fbaseunitid unitID,
         case when m.Fstockdirect='GENERAL' then d.FBaseQty else -d.FBaseQty end qty,
-        d.f_Ux_Unloadcosttype_d costID,d.f_ux_inprice_d zxfPrice,
+        d.f_Ux_Unloadcosttype_d costID,d.F_UX_TOTALBASEQTY_D,d.f_ux_inprice_d zxfPrice,
         case when m.Fstockdirect='GENERAL' then d.f_ux_inamount_d else -d.f_ux_inamount_d end zxf,
         d.f_ux_fjinprice fjfPrice,
         case when m.Fstockdirect='GENERAL' then d.f_ux_fjowneramount else -d.f_ux_fjowneramount end fjf,
@@ -119,7 +120,7 @@ from
  Union ALL
 --查询出库明细数据
  select m.Fownerid,m.FBillNo,d.Fmaterialid,d.Fbaseunitid,case when m.Fstockdirect='GENERAL' then d.FBaseQty else -d.FBaseQty end,
-        d.f_Ux_Unloadcosttype_d,
+        d.f_Ux_Unloadcosttype_d,d.F_UX_TOTALBASEQTY_D,
         d.F_UX_OUTPRICE_D,case when m.Fstockdirect='GENERAL' then d.F_UX_OUTAMOUNT_D else -F_UX_OUTAMOUNT_D end,
         d.F_UX_FJINPRICE,case when m.Fstockdirect='GENERAL' then d.F_UX_FJOWNERAMOUNT else -d.F_UX_FJOWNERAMOUNT end,
         d.F_UX_WORKERPRICE_D,case when m.Fstockdirect='GENERAL' then d.F_UX_WORKAMOUNT_D else -d.F_UX_WORKAMOUNT_D end,
